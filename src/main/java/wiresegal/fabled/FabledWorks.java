@@ -93,6 +93,8 @@ public class FabledWorks {
             for (Trait trait : traits)
                 penetratingAmount = trait.modifyWithPenetrationMultiplier(stack, penetratingAmount);
 
+            penetratingAmount = Math.min(1f, penetratingAmount);
+
             if (penetratingAmount > 0) {
                 DamageSource bypass = new DamageSourcePenetrating(source);
 
