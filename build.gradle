@@ -13,29 +13,34 @@ buildscript {
 
 apply plugin: "net.minecraftforge.gradle.forge"
 
-version = modVersion
-group= modGroup
-archivesBaseName = modBaseName
+version = mod_version
+group= mod_group
+archivesBaseName = mod_name
 
 minecraft {
-    version = project.forgeVersion
+    version = project.forge_version
     runDir = "run"
 
-    clientJvmArgs = ["-Dfml.coreMods.load=$core_plugin"]
-    serverJvmArgs = ["-Dfml.coreMods.load=$core_plugin"]
+    if (!core_plugin.isEmpty()) {
+        clientJvmArgs = ["-Dfml.coreMods.load=$core_plugin"]
+        serverJvmArgs = ["-Dfml.coreMods.load=$core_plugin"]
+    }
 
-    mappings = project.mcpVersion
+    mappings = project.mcp_version
 
-    replace 'GRADLE:VERSION', modVersion
+    replace 'GRADLE:VERSION', mod_version
 
-    replaceIn 'ShotgunsAndGlitter.java'
+    replaceIn mod_main_class
+    replaceIn "mcmod.info"
 }
 
-jar {
-    manifest {
-        attributes(
-                "FMLCorePluginContainsFMLMod": "true",
-                "FMLCorePlugin": core_plugin)
+if (!core_plugin.isEmpty()) {
+    jar {
+        manifest {
+            attributes(
+                    "FMLCorePluginContainsFMLMod": "true",
+                    "FMLCorePlugin": core_plugin)
+        }
     }
 }
 

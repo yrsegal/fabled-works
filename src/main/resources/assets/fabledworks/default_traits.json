@@ -1,0 +1,86 @@
+[
+  {
+    "_comment": "This is a heavily marked up example. The next one will be without comments.",
+    "Name": "sharp",
+    "Default Text": "Cutting Edge",
+    "Conflicts": [ "heavy" ],
+    "Attributes": {
+      "_comment": [
+        "Attributes can have three functions: Add (0), Multiply (1), and Exponential (2).",
+        "Each function acts like the equivalent number in vanilla.",
+        "Consult the minecraft wiki for more information. Some useful default attributes might be:",
+        "generic.attackDamage", "generic.attackSpeed", "generic.reachDistance"
+      ],
+      "generic.attackDamage": {
+        "_comment": [
+          "Valid locations are:",
+          "Main Hand", "Off Hand", "Head", "Body", "Legs", "Feet"
+        ],
+        "Main Hand": {
+          "Uncommon": { "Multiply": 1.1 },
+          "Rare": { "Multiply": 1.2 },
+          "Epic": { "Multiply": 1.5 },
+          "Legendary": { "Multiply": 2 }
+        }
+      }
+    },
+    "Knockback": {
+      "_comment": [
+        "Knockback is a simple multiplier. All you provide is a number."
+      ],
+      "Uncommon": 0.8,
+      "Rare": 0.85,
+      "Epic": 0.9,
+      "Legendary": 1
+    },
+    "Penetrating": {
+      "_comment": [
+        "This is the amount of the damage which should be piercing.",
+        "This is an example of omitting a value. If you do, that level will use the previous level's value, or the default.",
+        "The number with the largest magnitude will be used.",
+        "Negative results will stop piercing entirely."
+      ],
+      "Epic": 0.1,
+      "Legendary": 0.25
+    },
+    "Durability": {
+      "_comment": [
+        "This is the chance the trait gives the item to not take durability damage.",
+        "A value of 1 is effectively unbreakable."
+      ],
+      "Uncommon": 0.1,
+      "Rare": 0.1,
+      "Epic": 0.15,
+      "Legendary": 1
+    }
+  },
+  {
+    "Name": "heavy",
+    "Default Text": "Force",
+    "Conflicts": [ "sharp" ],
+    "Attributes": {
+      "generic.attackDamage": {
+        "Main Hand": {
+          "Uncommon": { "Add": 1 },
+          "Rare": { "Add": 2 },
+          "Epic": { "Add": 3.5 },
+          "Legendary": { "Multiply": 2 }
+        }
+      }
+    },
+    "Knockback": {
+      "Uncommon": 1.2,
+      "Rare": 1.25,
+      "Epic": 1.35,
+      "Legendary": 2
+    },
+    "Penetrating": {
+      "Epic": -0.2,
+      "Legendary": -0.5
+    },
+    "Durability": {
+      "Uncommon": 0.25,
+      "Legendary": 0.75
+    }
+  }
+]
