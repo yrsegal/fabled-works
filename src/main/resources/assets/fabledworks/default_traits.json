@@ -7,7 +7,7 @@
     "Attributes": {
       "_comment": [
         "Attributes can have three functions: Add (0), Multiply (1), and Exponential (2).",
-        "Each function acts like the equivalent number in vanilla.",
+        "Each function acts like the equivalent number in vanilla, except that Multiply and Exponential subtract one from the config value.",
         "Consult the minecraft wiki for more information. Some useful default attributes might be:",
         "generic.attackDamage", "generic.attackSpeed", "generic.reachDistance"
       ],
@@ -65,6 +65,11 @@
           "Rare": { "Add": 2 },
           "Epic": { "Add": 3.5 },
           "Legendary": { "Multiply": 2 }
+        }
+      },
+      "generic.attackSpeed": {
+        "Main Hand": {
+          "Uncommon": { "Multiply": 0.5 }
         }
       }
     },

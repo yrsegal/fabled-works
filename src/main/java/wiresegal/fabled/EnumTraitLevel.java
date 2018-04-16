@@ -77,7 +77,7 @@ public enum EnumTraitLevel {
     }
 
     @SideOnly(Side.CLIENT)
-    public String getLocalizedText(Trait trait) {
-        return getLocalizedText(trait.getLocalizedName());
+    public String getLocalizedText(Trait trait, boolean first) {
+        return I18n.format(FABLED + (first ? ".with" : ".and"), getLocalizedText(trait.getLocalizedName()));
     }
 }

@@ -37,7 +37,7 @@ public class Trait {
     private final String defaultName;
 
     @Nonnull
-    private final Map<EnumTraitLevel, TraitAtLevel> levels; // new EnumMap<>(EnumTraitLevel.class)
+    private final Map<EnumTraitLevel, TraitAtLevel> levels;
 
     public Trait(@Nonnull List<String> conflicts, @Nonnull String location, @Nonnull String defaultName, @Nonnull Map<EnumTraitLevel, TraitAtLevel> levels) {
         this.conflicts = conflicts;
@@ -56,7 +56,7 @@ public class Trait {
     private static JsonObject getSubObject(JsonObject obj, String... keys) {
         JsonObject current = obj;
         for (String key : keys)
-            current = getSubObject(key, obj);
+            current = getSubObject(key, current);
         return current;
     }
 
@@ -94,11 +94,7 @@ public class Trait {
             JsonObject attributeObject = getSubObject(trait, "Attributes");
             for (Map.Entry<String, JsonElement> element : attributeObject.entrySet())
                 if (!element.getKey().startsWith("_"))
-                    for (Map.Entry<String, JsonElement> location : trait.getAsJsonObject(element.getKey()).entrySet()) {
-                        if (!location.getKey().startsWith("_")) {
-                            attributesToApply.add(location.getKey());
-                        }
-                    }
+                    attributesToApply.add(element.getKey());
 
             EnumMap<EnumTraitLevel, TraitAtLevel> atLevels = new EnumMap<>(EnumTraitLevel.class);
 
@@ -120,9 +116,9 @@ public class Trait {
                             if (att.has("Add"))
                                 attributes.put(attribute, new AttributeModifier(name + attId++, att.get("Add").getAsDouble(), 0));
                             if (att.has("Multiply"))
-                                attributes.put(attribute, new AttributeModifier(name + attId++, att.get("Multiply").getAsDouble(), 0));
+                                attributes.put(attribute, new AttributeModifier(name + attId++, att.get("Multiply").getAsDouble() - 1, 1));
                             if (att.has("Exponential"))
-                                attributes.put(attribute, new AttributeModifier(name + attId++, att.get("Exponential").getAsDouble(), 0));
+                                attributes.put(attribute, new AttributeModifier(name + attId++, att.get("Exponential").getAsDouble() - 1, 2));
                         }
                     }
                     if (!attributes.isEmpty())
@@ -150,8 +146,8 @@ public class Trait {
 
             return new Trait(conflicts, name, defaultText, atLevels);
 
-        } catch (Throwable e){
-            // NO-OP
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
 
         return null;

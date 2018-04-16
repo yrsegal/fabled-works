@@ -5,8 +5,10 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import net.minecraft.enchantment.EnumEnchantmentType;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import wiresegal.fabled.TraitManager;
 
@@ -28,12 +30,12 @@ public class ModConfig {
 
     public static void injectConfigFile(File recommended) {
         String oldName = recommended.getName();
-        String newName = oldName.substring(oldName.lastIndexOf('.')) + ".json";
+        String newName = oldName.substring(0, oldName.lastIndexOf('.')) + ".json";
         configFile = new File(recommended.getParentFile(), newName);
     }
 
     public static void init() {
-        if (configFile.mkdirs()) {
+        if (configFile.getParentFile().exists() || configFile.getParentFile().mkdirs()) {
             JsonConfig config = new JsonConfig(configFile);
             config.comment("Config for Fabled Works");
             generalSection(config.category("general"));
@@ -45,7 +47,10 @@ public class ModConfig {
 
 
     private static boolean canItemHaveTraits(Item item) {
-        return EnumEnchantmentType.ALL.canEnchantItem(item);
+        ItemStack stack = new ItemStack(item);
+        return item.isDamageable() && item.isEnchantable(stack) &&
+                !item.getAttributeModifiers(EntityEquipmentSlot.MAINHAND, stack)
+                    .get(SharedMonsterAttributes.ATTACK_DAMAGE.getName()).isEmpty();
     }
 
     private static void generalSection(JsonConfig category) {

@@ -37,7 +37,7 @@ public class TraitAtLevel {
     public void applyAttributes(@Nonnull Multimap<String, AttributeModifier> modifiers, @Nonnull EntityEquipmentSlot slot) {
         Multimap<String, AttributeModifier> mine = attributes.get(slot);
         if (mine != null)
-            modifiers.putAll(attributes.get(slot));
+            modifiers.putAll(mine);
     }
 
     public double getKnockbackMultiplier(double current) {

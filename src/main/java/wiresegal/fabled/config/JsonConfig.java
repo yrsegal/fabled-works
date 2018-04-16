@@ -231,6 +231,7 @@ public class JsonConfig {
             jsonWriter.setSerializeNulls(true);
             jsonWriter.setIndent("\t");
             Streams.write(configData, jsonWriter);
+            jsonWriter.close();
         } catch (IOException e) {
             // NO-OP
         }

@@ -1,7 +1,6 @@
 package wiresegal.fabled;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -24,8 +23,10 @@ import wiresegal.fabled.config.ModConfig;
 import wiresegal.fabled.config.Trait;
 import wiresegal.fabled.wrappers.DamageSourcePenetrating;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import static wiresegal.fabled.FabledWorks.FABLED;
 
@@ -48,19 +49,23 @@ public class FabledWorks {
         List<Trait> traits = TraitManager.allTraitsOnStack(stack);
         EnumTraitLevel traitLevel = EnumTraitLevel.NULL;
 
+        boolean any = true;
+
         for (Trait trait : traits) {
             EnumTraitLevel level = TraitManager.getLevel(stack, trait);
-            if (level != EnumTraitLevel.NULL)
-                inject.add(level.getLocalizedText(trait));
+            if (level != EnumTraitLevel.NULL) {
+                inject.add(level.getLocalizedText(trait, any));
+                any = false;
+            }
             if (level.compareTo(traitLevel) > 0)
                 traitLevel = level;
         }
 
         if (traitLevel != EnumTraitLevel.NULL) {
-            tooltip.set(0, traitLevel.getLocalizedText(tooltip.get(0)));
+            tooltip.set(0, traitLevel.getColor() + tooltip.get(0));
 
-            if (tooltip.size() > 1)
-                inject.add("\n");
+            if (tooltip.size() > 1 && !tooltip.get(1).isEmpty())
+                inject.add("");
             tooltip.addAll(1, inject);
         }
     }
@@ -178,7 +183,41 @@ public class FabledWorks {
     public static void applyAllModifiers(ItemStack stack, EntityEquipmentSlot slot, Multimap<String, AttributeModifier> attributes) {
         List<Trait> traits = TraitManager.allTraitsOnStack(stack);
 
+        Multimap<String, AttributeModifier> modifiers = HashMultimap.create();
+
         for (Trait trait : traits)
-            trait.applyAttributes(stack, attributes, slot);
+            trait.applyAttributes(stack, modifiers, slot);
+
+        Set<String> keys = ImmutableSet.copyOf(modifiers.keySet());
+
+        for (String key : keys) {
+            if (attributes.containsKey(key)) {
+                Collection<AttributeModifier> theModifiers = attributes.get(key);
+                if (theModifiers.size() == 1) {
+                    AttributeModifier first = theModifiers.iterator().next();
+                    if (first.getOperation() == 0) {
+                        double amount = first.getAmount();
+                        for (AttributeModifier mod : modifiers.get(key))
+                            if (mod.getOperation() == 0)
+                                amount += mod.getAmount();
+
+                        double multiplier = 0;
+
+                        for (AttributeModifier mod : modifiers.get(key))
+                            if (mod.getOperation() == 1)
+                                multiplier += mod.getAmount();
+
+                        amount *= (1 + multiplier);
+
+                        for (AttributeModifier mod : modifiers.get(key))
+                            if (mod.getOperation() == 2)
+                                amount *= 1 + mod.getAmount();
+
+                        attributes.removeAll(key);
+                        attributes.put(key, new AttributeModifier(first.getID(), first.getName(), amount, 0));
+                    } else attributes.putAll(key, modifiers.get(key));
+                } else attributes.putAll(key, modifiers.get(key));
+            } else attributes.putAll(key, modifiers.get(key));
+        }
     }
 }
