@@ -21,7 +21,7 @@ import java.util.Set;
  */
 public class TraitGenerator {
     public static void rollTraits(ItemStack stack, Random random, boolean fromLoot) {
-        if ((fromLoot || ModConfig.traitsFromLootOnly) && ModConfig.canReceiveTraits.test(stack.getItem())) {
+        if ((fromLoot || !ModConfig.traitsFromLootOnly) && ModConfig.canReceiveTraits.test(stack.getItem())) {
             List<TraitRoll> rolls = getTraitPool();
             int totalWeight = WeightedRandom.getTotalWeight(rolls);
             if (fromLoot)
