@@ -103,7 +103,11 @@ public class FabledWorks {
                 subtract = (float) penetratingAmount;
                 int resistanceTime = target.hurtResistantTime;
                 target.attackEntityFrom(bypass, event.getAmount() * subtract);
-                target.hurtResistantTime = resistanceTime;
+
+                if (penetratingAmount == 1)
+                    event.setCanceled(true);
+                else
+                    target.hurtResistantTime = resistanceTime;
             }
 
             if (!aggressor.world.isRemote) for (Trait trait : traits)
