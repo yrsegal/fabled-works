@@ -4,6 +4,7 @@
     "Name": "sharp",
     "Default Text": "Cutting Edge",
     "Conflicts": [ "heavy" ],
+    "Weight": 100,
     "Attributes": {
       "_comment": [
         "Attributes can have three functions: Add (0), Multiply (1), and Exponential (2).",
@@ -21,6 +22,11 @@
           "Rare": { "Multiply": 1.2 },
           "Epic": { "Multiply": 1.5 },
           "Legendary": { "Multiply": 2 }
+        }
+      },
+      "generic.attackSpeed": {
+        "Main Hand": {
+          "Uncommon": { "Multiply": 0.75 }
         }
       }
     },
@@ -58,6 +64,7 @@
     "Name": "heavy",
     "Default Text": "Force",
     "Conflicts": [ "sharp" ],
+    "Weight": 80,
     "Attributes": {
       "generic.attackDamage": {
         "Main Hand": {
@@ -69,7 +76,7 @@
       },
       "generic.attackSpeed": {
         "Main Hand": {
-          "Uncommon": { "Multiply": 0.5 }
+          "Uncommon": { "Multiply": 1.25 }
         }
       }
     },

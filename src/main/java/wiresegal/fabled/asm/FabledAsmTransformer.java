@@ -32,6 +32,7 @@ public class FabledAsmTransformer implements IClassTransformer, Opcodes {
 
     static {
         transformers.put("net.minecraft.item.ItemStack", FabledAsmTransformer::transformItemStack);
+        transformers.put("net.minecraft.world.storage.loot.LootEntryItem", FabledAsmTransformer::transformLootEntry);
     }
 
     private static final String MULTIMAP = "Lcom/google/common/collect/Multimap;";
@@ -39,18 +40,56 @@ public class FabledAsmTransformer implements IClassTransformer, Opcodes {
     private static final String SLOT = "Lnet/minecraft/inventory/EntityEquipmentSlot;";
     private static final String RANDOM = "Ljava/util/Random;";
     private static final String PLAYER_MP = "Lnet/minecraft/entity/player/EntityPlayerMP;";
+    private static final String COLLECTION = "Ljava/util/Collection;";
+    private static final String LOOT_CONTEXT = "Lnet/minecraft/world/storage/loot/LootContext;";
+    private static final String ENTITY = "Lnet/minecraft/entity/Entity;";
+    private static final String WORLD = "Lnet/minecraft/world/World;";
+
+    private static byte[] transformLootEntry(byte[] basicClass) {
+        MethodSignature generate = new MethodSignature("addLoot", "func_186363_a",
+                "(" + COLLECTION + RANDOM + LOOT_CONTEXT + ")V");
+        MethodSignature empty = new MethodSignature("isEmpty", "func_190926_b",
+                "()Z");
+
+        String itemStackClass = "net/minecraft/item/ItemStack";
+
+        return transform(basicClass, generate, "Loot generation hook", combine(
+                (node) -> (node.getOpcode() == INVOKEVIRTUAL || node.getOpcode() == INVOKESPECIAL) &&
+                        ((MethodInsnNode) node).owner.equals(itemStackClass) &&
+                        empty.matches((MethodInsnNode) node),
+                (method, node) -> {
+                    InsnList newInstructions = new InsnList();
+
+                    // * denotes a reference to the object preceding it on the stack.
+
+                    // ItemStack
+                    newInstructions.add(new InsnNode(DUP)); // ItemStack, *
+                    newInstructions.add(new VarInsnNode(ALOAD, 2)); // ItemStack, *, Random
+                    newInstructions.add(new MethodInsnNode(INVOKESTATIC, ASM_HOOKS, "modifyLootStack",
+                            "(" + STACK + RANDOM + ")V", false));
+
+                    return true;
+                }));
+
+    }
 
     private static byte[] transformItemStack(byte[] basicClass) {
         MethodSignature size = new MethodSignature("getAttributeModifiers", "func_111283_C",
                 "(" + SLOT + ")" + MULTIMAP);
         MethodSignature damage = new MethodSignature("attemptDamageItem", "func_96631_a",
                 "(I" + RANDOM + PLAYER_MP + ")Z");
+        MethodSignature updateStack = new MethodSignature("updateAnimation", "func_77945_a",
+                "(" + WORLD + ENTITY + "IZ)V");
 
         String unbreakingClass = "net/minecraft/enchantment/EnchantmentDurability";
         MethodSignature unbreaking = new MethodSignature("negateDamage", "func_92097_a",
                 "(" + STACK + "I" + RANDOM + ")Z");
 
-        return transform(transform(basicClass,
+        String itemClass = "net/minecraft/item/Item";
+        MethodSignature update = new MethodSignature("onUpdate", "func_77663_a",
+                "(" + STACK + WORLD + ENTITY + "IZ)V");
+
+        return transform(transform(transform(basicClass,
                 size, "Attribute hook", combine(
                         (node) -> node.getOpcode() == ARETURN,
                         (method, node) -> {
@@ -58,6 +97,7 @@ public class FabledAsmTransformer implements IClassTransformer, Opcodes {
 
                             // * denotes a reference to the object preceding it on the stack.
 
+                            // Multimap
                             newInstructions.add(new InsnNode(DUP)); // Multimap, *
                             newInstructions.add(new VarInsnNode(ALOAD, 0)); // Multimap, *, ItemStack
                             newInstructions.add(new VarInsnNode(ALOAD, 1)); // Multimap, *, ItemStack, EntityEquipmentSlot
@@ -86,6 +126,22 @@ public class FabledAsmTransformer implements IClassTransformer, Opcodes {
                             method.instructions.insert(node, newInstructions);
 
                             return false;
+                        })),
+                updateStack, "Item update hook", combine(
+                        (node) -> (node.getOpcode() == INVOKEVIRTUAL || node.getOpcode() == INVOKESPECIAL) &&
+                                ((MethodInsnNode) node).owner.equals(itemClass) &&
+                                update.matches((MethodInsnNode) node),
+                        (method, node) -> {
+                            InsnList newInstructions = new InsnList();
+
+                            newInstructions.add(new VarInsnNode(ALOAD, 0)); // ItemStack
+                            newInstructions.add(new VarInsnNode(ALOAD, 1)); // ItemStack, World
+                            newInstructions.add(new MethodInsnNode(INVOKESTATIC, ASM_HOOKS, "itemUpdate",
+                                    "(" + STACK + WORLD + ")V", false));
+
+                            method.instructions.insert(node, newInstructions);
+
+                            return true;
                         }));
     }
 

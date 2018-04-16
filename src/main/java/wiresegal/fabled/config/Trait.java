@@ -39,11 +39,14 @@ public class Trait {
     @Nonnull
     private final Map<EnumTraitLevel, TraitAtLevel> levels;
 
-    public Trait(@Nonnull List<String> conflicts, @Nonnull String location, @Nonnull String defaultName, @Nonnull Map<EnumTraitLevel, TraitAtLevel> levels) {
+    private final int weight;
+
+    public Trait(@Nonnull List<String> conflicts, @Nonnull String location, @Nonnull String defaultName, @Nonnull Map<EnumTraitLevel, TraitAtLevel> levels, int weight) {
         this.conflicts = conflicts;
         this.location = location;
         this.defaultName = defaultName;
         this.levels = levels;
+        this.weight = weight;
     }
 
     private static JsonObject getSubObject(String key, JsonObject obj) {
@@ -85,6 +88,11 @@ public class Trait {
         try {
             String name = trait.get("Name").getAsString();
             String defaultText = trait.get("Default Text").getAsString();
+
+            int weight = 100;
+            if (trait.has("Weight"))
+                weight = trait.get("Weight").getAsInt();
+
             List<String> conflicts = Lists.newArrayList();
             if (trait.has("Conflicts"))
                 for (JsonElement el : trait.getAsJsonArray("Conflicts"))
@@ -144,7 +152,7 @@ public class Trait {
                 atLevels.put(level, new TraitAtLevel(durability, penetration, knockback, allAttributes, command));
             }
 
-            return new Trait(conflicts, name, defaultText, atLevels);
+            return new Trait(conflicts, name, defaultText, atLevels, weight);
 
         } catch (Throwable e) {
             e.printStackTrace();
@@ -153,12 +161,13 @@ public class Trait {
         return null;
     }
 
+    public boolean canBeAppliedWith(@Nonnull Trait other) {
+        return other != this && !conflicts.contains(other.location) && !other.conflicts.contains(location);
+    }
 
     public boolean canBeAppliedWith(@Nonnull String other) {
-        if (other.equals(location) || conflicts.contains(other))
-            return false;
         Trait otherTrait = TraitManager.lookupTrait(other);
-        return otherTrait != null && !otherTrait.conflicts.contains(getName());
+        return otherTrait != null && canBeAppliedWith(otherTrait);
     }
 
     @Nonnull
@@ -178,6 +187,10 @@ public class Trait {
     @Nonnull
     public String getNBTKey() {
         return getName();
+    }
+
+    public int getWeight() {
+        return weight;
     }
 
     public boolean isInCompound(@Nonnull NBTTagCompound compound) {

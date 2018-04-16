@@ -157,6 +157,8 @@ public class FabledWorks {
         ModConfig.init();
     }
 
+    // All ASM methods
+
     private static double chance = 0;
 
     public static boolean preventDamage(ItemStack stack, boolean newIndex, Random random) {

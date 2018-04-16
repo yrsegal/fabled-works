@@ -10,6 +10,8 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import wiresegal.fabled.EnumTraitLevel;
+import wiresegal.fabled.TraitGenerator;
 import wiresegal.fabled.TraitManager;
 
 import java.io.File;
@@ -25,6 +27,12 @@ public class ModConfig {
     public static Predicate<Item> canReceiveTraits = ModConfig::canItemHaveTraits;
 
     public static boolean traitsFromLootOnly;
+
+    public static double weightOfNone;
+    public static int weightOfUncommon;
+    public static int weightOfRare;
+    public static int weightOfEpic;
+    public static int weightOfLegendary;
 
     private static File configFile;
 
@@ -57,6 +65,12 @@ public class ModConfig {
         category.comment("general");
 
         traitsFromLootOnly = category.get("Traits only come from loot", true);
+
+        weightOfNone = category.get("Weights." + "Chance to have no traits", 0.9);
+        weightOfUncommon = category.get("Weights." + EnumTraitLevel.UNCOMMON.getJsonKey(), 100);
+        weightOfRare = category.get("Weights." + EnumTraitLevel.RARE.getJsonKey(), 75);
+        weightOfEpic = category.get("Weights." + EnumTraitLevel.EPIC.getJsonKey(), 50);
+        weightOfLegendary = category.get("Weights." + EnumTraitLevel.LEGENDARY.getJsonKey(), 25);
     }
 
     private static void whitelistSection(JsonConfig category) {
@@ -105,6 +119,7 @@ public class ModConfig {
         JsonArray traits = category.get("Traits", defaultTraits);
 
         TraitManager.purgeAllTraits();
+        TraitGenerator.invalidateTraitPool();
 
         for (JsonElement traitEl : traits) {
             if (traitEl.isJsonObject()) {

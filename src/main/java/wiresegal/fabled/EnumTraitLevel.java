@@ -71,6 +71,21 @@ public enum EnumTraitLevel {
         return color;
     }
 
+    @Nonnull
+    public EnumTraitLevel getSecondary() {
+        return values()[Math.max(0, ordinal() - 1)];
+    }
+
+    @Nonnull
+    public EnumTraitLevel getTertiaryFirst() {
+        return values()[Math.max(0, ordinal() - 2)];
+    }
+
+    @Nonnull
+    public EnumTraitLevel getTertiarySecond() {
+        return values()[Math.max(0, ordinal() - 2)];
+    }
+
     @SideOnly(Side.CLIENT)
     public String getLocalizedText(String formatParameter) {
         return getColor() + I18n.format(FABLED + ".level." + getName(), formatParameter);
