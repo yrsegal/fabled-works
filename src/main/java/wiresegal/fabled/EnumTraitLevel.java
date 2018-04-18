@@ -4,6 +4,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.commons.lang3.ArrayUtils;
 import wiresegal.fabled.config.Trait;
 
 import javax.annotation.Nonnull;
@@ -27,11 +28,15 @@ public enum EnumTraitLevel {
     private static final Map<String, EnumTraitLevel> REVERSE_LOOKUP;
 
     public static final EnumTraitLevel[] LEVELS = Arrays.copyOfRange(values(), 1, values().length);
+    public static final EnumTraitLevel[] LEVELS_DOWN = Arrays.copyOfRange(values(), 1, values().length);
+
 
     static {
         REVERSE_LOOKUP = new HashMap<>();
         for (EnumTraitLevel level : LEVELS)
             REVERSE_LOOKUP.put(level.getName(), level);
+
+        ArrayUtils.reverse(LEVELS_DOWN);
     }
 
     @Nonnull

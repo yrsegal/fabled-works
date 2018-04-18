@@ -68,6 +68,8 @@ public class FabledAsmTransformer implements IClassTransformer, Opcodes {
                     newInstructions.add(new MethodInsnNode(INVOKESTATIC, ASM_HOOKS, "modifyLootStack",
                             "(" + STACK + RANDOM + ")V", false));
 
+                    method.instructions.insertBefore(node, newInstructions);
+
                     return true;
                 }));
 
@@ -344,7 +346,7 @@ public class FabledAsmTransformer implements IClassTransformer, Opcodes {
     }
 
     public static void log(String str) {
-        LogManager.getLogger("Thicc ASM").info(str);
+        LogManager.getLogger("Fabled ASM").info(str);
     }
 
     public static void prettyPrint(MethodNode node) {

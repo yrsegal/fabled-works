@@ -51,14 +51,15 @@ public class FabledWorks {
 
         boolean any = true;
 
-        for (Trait trait : traits) {
-            EnumTraitLevel level = TraitManager.getLevel(stack, trait);
-            if (level != EnumTraitLevel.NULL) {
-                inject.add(level.getLocalizedText(trait, any));
-                any = false;
+        for (EnumTraitLevel level : EnumTraitLevel.LEVELS_DOWN) {
+            for (Trait trait : traits) {
+                if (TraitManager.getLevel(stack, trait) == level) {
+                    inject.add(level.getLocalizedText(trait, any));
+                    any = false;
+                    if (level.compareTo(traitLevel) > 0)
+                        traitLevel = level;
+                }
             }
-            if (level.compareTo(traitLevel) > 0)
-                traitLevel = level;
         }
 
         if (traitLevel != EnumTraitLevel.NULL) {

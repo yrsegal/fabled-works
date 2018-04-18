@@ -25,7 +25,7 @@ public class TraitGenerator {
             List<TraitRoll> rolls = getTraitPool();
             int totalWeight = WeightedRandom.getTotalWeight(rolls);
             if (fromLoot)
-                totalWeight /= 2;
+                totalWeight -= poolSize / 2;
             TraitRoll rolled = WeightedRandom.getRandomItem(random, rolls, totalWeight);
             rolled.apply(stack);
         }
@@ -37,6 +37,7 @@ public class TraitGenerator {
     }
 
     private static List<TraitRoll> traitPool = null;
+    private static int poolSize = 0;
 
     @Nonnull
     private static List<TraitRoll> getTraitPool() {
@@ -53,9 +54,13 @@ public class TraitGenerator {
             for (EnumTraitLevel level : EnumTraitLevel.LEVELS)
                 addAllForPrimary(traits, new LeveledTrait(trait, level));
 
-        traits.add(new TraitRoll(null, null, null, null));
+        List<TraitRoll> pool = Lists.newArrayList(traits);
 
-        return Lists.newArrayList(traits);
+        int weightOfAll = WeightedRandom.getTotalWeight(pool);
+        poolSize = (int) (weightOfAll * (ModConfig.weightOfNone) / (1 - ModConfig.weightOfNone));
+        pool.add(new TraitRoll(poolSize));
+
+        return pool;
     }
 
     private static void addAllForPrimary(Set<TraitRoll> rolls, LeveledTrait trait) {
@@ -64,7 +69,6 @@ public class TraitGenerator {
         EnumTraitLevel secondaryLevel = trait.level.getSecondary();
         EnumTraitLevel tertiaryFirstLevel = trait.level.getTertiaryFirst();
         EnumTraitLevel tertiarySecondLevel = trait.level.getTertiarySecond();
-
 
         permuteTraitRolls(rolls, trait,
                 secondaryLevel, tertiaryFirstLevel, tertiarySecondLevel,
@@ -112,11 +116,11 @@ public class TraitGenerator {
 
         for (EnumTraitLevel levelOfSecondary : levels) {
             for (EnumTraitLevel levelOfTertiaryFirst : tertiaryFirst == null ? nl : levels) {
-                if (levelOfTertiaryFirst.ordinal() > levelOfSecondary.ordinal())
+                if (levelOfTertiaryFirst.ordinal() >= levelOfSecondary.ordinal())
                     continue;
 
                 for (EnumTraitLevel levelOfTertiarySecond : tertiarySecond == null ? nl : levels) {
-                    if (levelOfTertiarySecond.ordinal() > levelOfSecondary.ordinal())
+                    if (levelOfTertiarySecond.ordinal() >= levelOfSecondary.ordinal())
                         continue;
 
                     rolls.add(new TraitRoll(trait,
@@ -146,15 +150,28 @@ public class TraitGenerator {
         @Nullable
         private final LeveledTrait tertiarySecond;
 
-        public TraitRoll(@Nullable LeveledTrait primary,
-                         @Nullable LeveledTrait secondary,
-                         @Nullable LeveledTrait tertiaryFirst,
-                         @Nullable LeveledTrait tertiarySecond) {
-            super(calculateWeight(primary, secondary, tertiaryFirst, tertiarySecond));
+        private TraitRoll(@Nullable LeveledTrait primary,
+                          @Nullable LeveledTrait secondary,
+                          @Nullable LeveledTrait tertiaryFirst,
+                          @Nullable LeveledTrait tertiarySecond,
+                          int weight) {
+            super(weight);
             this.primary = primary;
             this.secondary = secondary;
             this.tertiaryFirst = tertiaryFirst;
             this.tertiarySecond = tertiarySecond;
+        }
+
+        public TraitRoll(@Nullable LeveledTrait primary,
+                         @Nullable LeveledTrait secondary,
+                         @Nullable LeveledTrait tertiaryFirst,
+                         @Nullable LeveledTrait tertiarySecond) {
+            this(primary, secondary, tertiaryFirst, tertiarySecond,
+                    calculateWeight(primary, secondary, tertiaryFirst, tertiarySecond));
+        }
+
+        public TraitRoll(int weight) {
+            this(null, null, null, null, weight);
         }
 
         public void apply(ItemStack stack) {
@@ -197,12 +214,16 @@ public class TraitGenerator {
             if (tertiarySecond != null)
                 weightPercentage *= tertiarySecond.weightCost();
 
-            if (weightPercentage == 1)
-                return (int) (defaultWeight * ModConfig.weightOfNone / (1 - ModConfig.weightOfNone));
-
             return Math.max((int) (defaultWeight * weightPercentage), 1);
         }
 
+        @Override
+        public String toString() {
+            return "" + primary + " " +
+                    secondary + " " +
+                    tertiaryFirst + " " +
+                    tertiarySecond;
+        }
 
         @Override
         public boolean equals(Object o) {
@@ -231,6 +252,11 @@ public class TraitGenerator {
             this.level = level;
         }
 
+        @Override
+        public String toString() {
+            return trait.getName() + ":" + level.getJsonKey();
+        }
+
         public Trait getTrait() {
             return trait;
         }
@@ -256,7 +282,7 @@ public class TraitGenerator {
                     break;
             }
 
-            return (forLevel * trait.getWeight()) / (ModConfig.weightOfUncommon * 100);
+            return (forLevel * trait.getWeight()) / (ModConfig.weightOfUncommon * 100 * 2);
         }
 
         @Override
