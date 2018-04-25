@@ -27,7 +27,7 @@ import java.util.function.Predicate;
 
 public class FabledAsmTransformer implements IClassTransformer, Opcodes {
 
-    private static final String ASM_HOOKS = "wiresegal/fabled/asm/FabledAsmHooks";
+    private static final String ASM_HOOKS = "wiresegal/fabled/asm/hooks/FabledAsmHooks";
     private static final Map<String, Transformer> transformers = new HashMap<>();
 
     static {

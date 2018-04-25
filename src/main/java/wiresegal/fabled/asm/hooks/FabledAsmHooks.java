@@ -1,4 +1,4 @@
-package wiresegal.fabled.asm;
+package wiresegal.fabled.asm.hooks;
 
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
